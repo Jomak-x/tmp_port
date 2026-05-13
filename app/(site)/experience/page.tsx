@@ -1,3 +1,5 @@
-export default function experience() {
-  return <h1>Hey experience</h1>;
+import ExperienceView from "@/components/ExperienceView";
+
+export default function ExperiencePage() {
+  return <ExperienceView />;
 }

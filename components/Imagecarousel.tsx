@@ -6,6 +6,7 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 type CarouselProps = {
   children: ReactNode;
   className?: string;
+  wrapperClassName?: string;
   boxWidth?: number | string;
   boxHeight?: number | string;
   autoSlide?: boolean;
@@ -17,6 +18,7 @@ type CarouselProps = {
 export default function ImageCarousel({
   children,
   className = "",
+  wrapperClassName = "m-5",
   boxWidth = "min(92vw, 520px)",
   boxHeight = 320,
   autoSlide = false,
@@ -58,7 +60,7 @@ export default function ImageCarousel({
 
   return (
     <div
-      className={`m-5 rounded-3xl border-4 ${bordercolor} bg-black/10 shadow-lg`}
+      className={`${wrapperClassName} rounded-3xl border-4 ${bordercolor} bg-black/10 shadow-lg`}
       style={{ width: resolvedWidth, height: resolvedHeight }}
     >
       <div
@@ -109,8 +111,8 @@ export default function ImageCarousel({
                     key={i}
                     type="button"
                     onClick={() => setCurr(i)}
-                    className={`transition-all w-3 h-3 rounded-full bg-white ${
-                      safeCurr === i ? "scale-125" : "bg-opacity-50"
+                    className={`transition-all w-3 h-3 rounded-full ${
+                      safeCurr === i ? "scale-125 bg-white" : "bg-white/50"
                     }`}
                     aria-label={`Go to slide ${i + 1}`}
                   />

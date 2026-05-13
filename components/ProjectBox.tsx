@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 
 type ProjectBoxProps = {
   name: string;
@@ -30,11 +31,12 @@ export default function ProjectBox({
   const remainingCount = technologies.length - visibleTech.length;
 
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className={`${bgcolor} border-4 rounded-3xl overflow-hidden h-140 w-full ${borderColor}`}
+      className={`${bgcolor} group flex h-full min-h-[31rem] w-full flex-col overflow-hidden rounded-2xl border-2 ${borderColor} text-left shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-orange-300`}
     >
-      <div className="relative h-55">
+      <div className="relative h-52 overflow-hidden bg-black/30 sm:h-56">
         {startvid ? (
           <video
             src={startvid}
@@ -43,46 +45,48 @@ export default function ProjectBox({
             loop
             playsInline
             preload="metadata"
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : startimg ? (
           <Image
             src={startimg}
-            alt="slAIde"
+            alt={`${name} preview`}
             fill
-            className="object-cover"
+            className="object-cover transition duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 440px"
           />
         ) : null}
       </div>
-      <div>
-        <div className="flex items-center line-clamp-1">
-          <div className={`mt-4 font-semibold ml-6 text-2xl ${textcolor}`}>
+      <div className="flex flex-1 flex-col p-5">
+        <div className="min-w-0">
+          <div className={`text-2xl font-semibold ${textcolor}`}>
             {name}
           </div>
-          <div className="mt-3 leading-none ml-6 text-gray-400 text-3xl">|</div>
-          <div className="mt-4 ml-3 text-xl text-gray-400">{location}</div>
+          <div className="mt-2 flex items-center gap-2 text-sm text-white/55">
+            <MapPin className="h-4 w-4 shrink-0" />
+            <span className="truncate">{location}</span>
+          </div>
         </div>
-        <div className={`text-xl h-40 m-3 flex items-center`}>
-          <div className="line-clamp-5">{short_desc}</div>
-        </div>
-        <div className="h-16 flex items-center justify-center gap-2">
+        <p className="mt-5 line-clamp-5 flex-1 text-base leading-7 text-white/78">
+          {short_desc}
+        </p>
+        <div className="mt-6 flex flex-wrap gap-2">
           {visibleTech.map((tech) => (
-            <div
-              className={`border-2 rounded-full px-3 py-1 ${borderColor}`}
+            <span
+              className={`rounded-full border px-3 py-1 text-xs text-white/82 ${borderColor}`}
               key={tech}
             >
               {tech}
-            </div>
+            </span>
           ))}
 
           {remainingCount > 0 && (
-            <div className={`border-2 rounded-full px-3 py-1 ${borderColor}`}>
+            <span className={`rounded-full border px-3 py-1 text-xs text-white/82 ${borderColor}`}>
               +{remainingCount}
-            </div>
+            </span>
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 }

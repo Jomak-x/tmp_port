@@ -8,11 +8,9 @@ export default function Home() {
   return (
     <div>
       <Hero />
-      <div className="flex justify-center items-center gap-8">
-        {" "}
-        {/* Center children horizontally with a gap */}
-        <Textbox text={profile.text} />
-        <Imagecarousel boxWidth={560} boxHeight={360}>
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-6 px-4 py-14 md:flex-row md:px-8">
+        <Textbox text={profile.text} height="min-h-80" width="w-full md:w-[34rem]" />
+        <Imagecarousel boxWidth="min(100%, 560px)" boxHeight="clamp(260px, 35vw, 360px)">
           {profile.hackathonimg.map((s, idx) => (
             <Image
               key={s}

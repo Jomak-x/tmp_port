@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useRef, useMemo } from "react";
+import { useState } from "react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { CgFileDocument } from "react-icons/cg";
 
@@ -22,47 +22,44 @@ const navicons: { [key: string]: React.ReactNode } = {
 };
 
 export default function Navbar() {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
-
-  const sliderStyle = useMemo(() => {
-    if (hoveredIndex === null) return { left: 0, width: 0 };
-
-    const hoveredLink = linkRefs.current[hoveredIndex];
-    if (!hoveredLink) return { left: 0, width: 0 };
-
-    return {
-      left: hoveredLink.offsetLeft,
-      width: hoveredLink.offsetWidth,
-    };
-  }, [hoveredIndex]);
+  const [sliderStyle, setSliderStyle] = useState({ left: 0, width: 0 });
+  const [isHovering, setIsHovering] = useState(false);
 
   return (
-    <div className="fixed top-4 left-0 right-0 z-50 flex justify-center">
-      <nav className="bg-orange-500 flex rounded-full p-6 shadow-xl relative">
-        {hoveredIndex !== null && (
+    <div className="fixed left-0 right-0 top-3 z-50 flex justify-center px-3">
+      <nav className="relative flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-orange-200/20 bg-orange-500/95 p-2 shadow-xl backdrop-blur sm:gap-2 sm:p-3">
+        {isHovering && (
           <div
-            className="absolute bg-orange-300 rounded-full transition-all duration-300"
+            className="absolute hidden rounded-full bg-orange-300 transition-all duration-300 sm:block"
             style={{
               left: sliderStyle.left,
               width: sliderStyle.width,
-              height: "50px",
+              height: "42px",
               top: "50%",
               transform: "translateY(-50%)",
             }}
           />
         )}
 
-        {navItems.map((item, index) => (
+        {navItems.map((item) => (
           <Link
             key={item.name}
             href={item.link}
             target={item.link.startsWith("http") ? "_blank" : undefined}
             rel={item.link.startsWith("http") ? "noopener noreferrer" : undefined}
-            ref={(el) => { linkRefs.current[index] = el; }}
-            className={item.picture ? "relative z-10 text-black px-5" : "relative z-10 text-black px-9 py-1"}
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
+            className={
+              item.picture
+                ? "relative z-10 rounded-full px-3 py-2 text-black transition hover:bg-orange-300 sm:px-4 sm:hover:bg-transparent"
+                : "relative z-10 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium text-black transition hover:bg-orange-300 sm:px-6 sm:text-base sm:hover:bg-transparent"
+            }
+            onMouseEnter={(event) => {
+              setSliderStyle({
+                left: event.currentTarget.offsetLeft,
+                width: event.currentTarget.offsetWidth,
+              });
+              setIsHovering(true);
+            }}
+            onMouseLeave={() => setIsHovering(false)}
           >
             {item.picture ? navicons[item.picture] : item.name}
           </Link>
@@ -71,4 +68,3 @@ export default function Navbar() {
     </div>
   );
 }
-

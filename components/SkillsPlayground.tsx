@@ -658,7 +658,7 @@ export default function SkillsPlayground() {
   };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#080816] text-white">
+    <div className="min-h-screen overflow-hidden bg-[#080816] text-white">
       <section
         ref={fieldRef}
         onPointerMove={handleFieldPointerMove}
@@ -701,8 +701,8 @@ export default function SkillsPlayground() {
             Skills
           </h1>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/62 md:text-lg">
-            A little bit different skills section. Drag/fling the bubbles around
-            and click to pop them.
+            Technical skills pulled from my resume, grouped by the places I use
+            them most.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/72">
@@ -815,6 +815,6 @@ export default function SkillsPlayground() {
           </div>
         ))}
       </section>
-    </main>
+    </div>
   );
 }

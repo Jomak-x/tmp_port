@@ -26,9 +26,5 @@ export default async function ProjectsPage() {
 
   const projectsWithMarkdown = Object.fromEntries(projectEntries);
 
-  return (
-    <div className="m-30">
-      <ProjectView projects={projectsWithMarkdown} />
-    </div>
-  );
+  return <ProjectView projects={projectsWithMarkdown} />;
 }

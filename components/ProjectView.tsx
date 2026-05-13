@@ -18,7 +18,7 @@ export default function ProjectView({ projects }: { projects: ProjectsMap }) {
     : null;
 
   return (
-    <div>
+    <div className="mx-auto max-w-7xl px-4 pb-20 pt-28 text-white sm:px-6 lg:px-8">
       {selectedProject && (
         <Projectexpand
           project={selectedProject}
@@ -26,7 +26,20 @@ export default function ProjectView({ projects }: { projects: ProjectsMap }) {
         />
       )}
 
-      <div className="flex grid grid-cols-1 xl:grid-cols-3 md:grid-cols-2 gap-10">
+      <div className="mb-12 max-w-3xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-orange-300/80">
+          Projects
+        </p>
+        <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
+          Selected builds from hackathons, research, and product experiments.
+        </h1>
+        <p className="mt-5 text-base leading-8 text-white/65 sm:text-lg">
+          Each card opens into a tighter project story with screenshots,
+          technology choices, and the parts that made the build interesting.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
         {Object.entries(projects).map(([projectKey, project]) => (
           <ProjectBox
             key={projectKey}
