@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect, useState, type CSSProperties } from "react"
-import { motion } from "motion/react"
+import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { motion, useInView, useReducedMotion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
 interface LightRaysProps extends React.HTMLAttributes<HTMLDivElement> {
-  ref?: React.Ref<HTMLDivElement>
   count?: number
   color?: string
   blur?: number
@@ -92,19 +91,32 @@ export function LightRays({
   blur = 36,
   speed = 14,
   length = "70vh",
-  ref,
   ...props
 }: LightRaysProps) {
   const [rays, setRays] = useState<LightRay[]>([])
+  const [compact, setCompact] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const isInView = useInView(containerRef, { amount: 0.05 })
+  const reducedMotion = useReducedMotion()
   const cycleDuration = Math.max(speed, 0.1)
+  const effectiveCount = reducedMotion ? 0 : compact ? Math.min(count, 6) : count
 
   useEffect(() => {
-    setRays(createRays(count, cycleDuration))
-  }, [count, cycleDuration])
+    const compactQuery = window.matchMedia("(max-width: 768px)")
+    const syncCompact = () => setCompact(compactQuery.matches)
+
+    syncCompact()
+    compactQuery.addEventListener("change", syncCompact)
+    return () => compactQuery.removeEventListener("change", syncCompact)
+  }, [])
+
+  useEffect(() => {
+    setRays(createRays(effectiveCount, cycleDuration))
+  }, [effectiveCount, cycleDuration])
 
   return (
     <div
-      ref={ref}
+      ref={containerRef}
       className={cn(
         "pointer-events-none absolute inset-0 isolate overflow-hidden rounded-[inherit]",
         className
@@ -112,7 +124,7 @@ export function LightRays({
       style={
         {
           "--light-rays-color": color,
-          "--light-rays-blur": `${blur}px`,
+          "--light-rays-blur": `${compact ? Math.min(blur, 24) : blur}px`,
           "--light-rays-length": length,
           ...style,
         } as CSSProperties
@@ -140,7 +152,7 @@ export function LightRays({
             } as CSSProperties
           }
         />
-        {rays.map((ray) => (
+        {isInView && rays.map((ray) => (
           <Ray key={ray.id} {...ray} />
         ))}
       </div>

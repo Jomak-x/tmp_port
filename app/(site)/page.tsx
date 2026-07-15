@@ -5,7 +5,13 @@ import { profile } from "@/data/profile";
 import Image from "next/image";
 import JsonLd from "@/components/JsonLd";
 import { experienceList } from "@/data/experience";
-import { absoluteUrl, createPageMetadata, siteConfig } from "@/lib/site";
+import {
+  absoluteUrl,
+  createPageMetadata,
+  SITE_LAST_UPDATED,
+  siteConfig,
+} from "@/lib/site";
+import { personId, websiteId } from "@/lib/structured-data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
@@ -13,6 +19,8 @@ export const metadata: Metadata = createPageMetadata({
   description: siteConfig.description,
   path: "/",
   absoluteTitle: true,
+  label: "Software Engineering Portfolio",
+  openGraphType: "profile",
 });
 
 export default function Home() {
@@ -20,8 +28,10 @@ export default function Home() {
     .filter((experience) => experience.endDate === null)
     .map((experience) => ({
       "@type": "EmployeeRole",
+      "@id": `${absoluteUrl(`/experience/${experience.slug}`)}#role`,
       roleName: experience.role,
       startDate: experience.startDate,
+      description: experience.summary,
       url: absoluteUrl(`/experience/${experience.slug}`),
       worksFor: {
         "@type": "Organization",
@@ -32,58 +42,85 @@ export default function Home() {
 
   const profileJsonLd = {
     "@context": "https://schema.org",
-    "@type": "ProfilePage",
-    name: "Jakob Laise - Software Engineer Portfolio",
-    url: absoluteUrl("/"),
-    mainEntity: {
-      "@type": "Person",
-      "@id": `${absoluteUrl("/")}#jakob-laise`,
-      name: "Jakob Laise",
-      alternateName: "Jomak-x",
-      url: absoluteUrl("/"),
-      image: absoluteUrl(siteConfig.image),
-      description: siteConfig.description,
-      email: `mailto:${siteConfig.email}`,
-      jobTitle: [
-        "Software Engineering & Developer Advocacy Intern",
-        "Software Engineering Student Fellow",
-        "Software Engineering Fellow",
-      ],
-      worksFor: currentRoles,
-      affiliation: [
-        {
-          "@type": "CollegeOrUniversity",
-          name: "University of Central Florida",
-          url: "https://www.ucf.edu/",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": websiteId(),
+        url: absoluteUrl("/"),
+        name: "Jakob Laise",
+        alternateName: "Jakob Laise Portfolio",
+        description: siteConfig.description,
+        inLanguage: siteConfig.language,
+        publisher: { "@id": personId() },
+      },
+      {
+        "@type": "ProfilePage",
+        "@id": `${absoluteUrl("/")}#profile-page`,
+        name: "Jakob Laise - Software Engineer Portfolio",
+        url: absoluteUrl("/"),
+        description: siteConfig.description,
+        inLanguage: siteConfig.language,
+        dateModified: SITE_LAST_UPDATED,
+        isPartOf: { "@id": websiteId() },
+        mainEntity: { "@id": personId() },
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: absoluteUrl(siteConfig.image),
+          width: 1200,
+          height: 1200,
+          caption: "Jakob Laise",
         },
-        {
-          "@type": "Organization",
-          name: "Databricks",
-          url: "https://www.databricks.com/",
-        },
-        {
-          "@type": "Organization",
-          name: "BASTA Code2Career",
-          url: "https://www.projectbasta.com/code2career",
-        },
-        {
-          "@type": "Organization",
-          name: "Knight Hacks",
-          url: "https://knighthacks.org/",
-        },
-      ],
-      sameAs: siteConfig.sameAs,
-      knowsAbout: [
-        "Software engineering",
-        "Developer advocacy",
-        "Full-stack development",
-        "Artificial intelligence",
-        "Machine learning",
-        "Databricks",
-        "Kubernetes",
-        "Developer tools",
-      ],
-    },
+      },
+      {
+        "@type": "Person",
+        "@id": personId(),
+        name: siteConfig.name,
+        givenName: siteConfig.givenName,
+        familyName: siteConfig.familyName,
+        alternateName: siteConfig.handle,
+        url: absoluteUrl("/"),
+        image: absoluteUrl(siteConfig.image),
+        description: siteConfig.description,
+        email: `mailto:${siteConfig.email}`,
+        mainEntityOfPage: { "@id": `${absoluteUrl("/")}#profile-page` },
+        jobTitle: currentRoles.map((role) => role.roleName),
+        hasOccupation: currentRoles,
+        affiliation: [
+          {
+            "@type": "CollegeOrUniversity",
+            name: "University of Central Florida",
+            url: "https://www.ucf.edu/",
+          },
+          {
+            "@type": "Organization",
+            name: "Databricks",
+            url: "https://www.databricks.com/",
+          },
+          {
+            "@type": "Organization",
+            name: "BASTA Code2Career",
+            url: "https://www.projectbasta.com/code2career",
+          },
+          {
+            "@type": "Organization",
+            name: "Knight Hacks",
+            url: "https://knighthacks.org/",
+          },
+        ],
+        sameAs: siteConfig.sameAs,
+        knowsLanguage: ["German", "English"],
+        knowsAbout: [
+          "Software engineering",
+          "Developer advocacy",
+          "Full-stack development",
+          "Artificial intelligence",
+          "Machine learning",
+          "Databricks",
+          "Kubernetes",
+          "Developer tools",
+        ],
+      },
+    ],
   };
 
   return (
@@ -108,7 +145,6 @@ export default function Home() {
                 fill
                 sizes="(max-width: 768px) 100vw, 40vw"
                 className="object-cover"
-                priority={idx === 0}
               />
             ))}
           </Imagecarousel>

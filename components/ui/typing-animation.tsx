@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { motion, MotionProps, useInView } from "motion/react"
+import { motion, MotionProps, useInView, useReducedMotion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
@@ -41,6 +41,7 @@ export function TypingAnimation({
   const [currentWordIndex, setCurrentWordIndex] = useState(0)
   const [currentCharIndex, setCurrentCharIndex] = useState(0)
   const [phase, setPhase] = useState<"typing" | "pause" | "deleting">("typing")
+  const reducedMotion = useReducedMotion()
   const elementRef = useRef<HTMLElement | null>(null)
   const isInView = useInView(elementRef as React.RefObject<Element>, {
     amount: 0.3,
@@ -59,7 +60,7 @@ export function TypingAnimation({
   const shouldStart = startOnView ? isInView : true
 
   useEffect(() => {
-    if (!shouldStart || wordsToAnimate.length === 0) return
+    if (!shouldStart || reducedMotion || wordsToAnimate.length === 0) return
 
     const timeoutDelay =
       delay > 0 && displayedText === ""
@@ -120,6 +121,7 @@ export function TypingAnimation({
     deletingSpeed,
     pauseDelay,
     delay,
+    reducedMotion,
   ])
 
   const currentWordGraphemes = Array.from(
@@ -154,8 +156,8 @@ export function TypingAnimation({
       className={cn("leading-[5rem] tracking-[-0.02em]", className)}
       {...props}
     >
-      {displayedText}
-      {shouldShowCursor && (
+      {reducedMotion ? wordsToAnimate[0] : displayedText}
+      {!reducedMotion && shouldShowCursor && (
         <span
           className={cn("inline-block", blinkCursor && "animate-blink-cursor")}
         >

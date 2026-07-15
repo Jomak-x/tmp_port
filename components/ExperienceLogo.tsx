@@ -26,7 +26,7 @@ export default function ExperienceLogo({
         viewBox="0 0 192 96"
         role="img"
         aria-label={`${experience.company} logos`}
-        className={`${sizeClasses} shrink-0 rounded-2xl border border-white/12 bg-white shadow-lg`}
+        className={`${sizeClasses} shrink-0 border border-white/15 bg-white`}
       >
         <image
           href={experience.logo}
@@ -63,7 +63,7 @@ export default function ExperienceLogo({
 
   return (
     <div
-      className={`relative ${sizeClasses} shrink-0 overflow-hidden rounded-2xl border border-white/12 bg-white p-2 shadow-lg`}
+      className={`relative ${sizeClasses} shrink-0 overflow-hidden border border-white/15 bg-white p-2`}
     >
       <Image
         src={experience.logo}

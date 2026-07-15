@@ -1,0 +1,9 @@
+# Large originals replaced by optimized WebP images and short preview videos.
+public/home/First_Page/Hackathon/*.png
+public/home/First_Page/profile1.png
+public/home/First_Page/personal/
+public/home/projects/**/*.png
+public/home/projects/**/*_demo.mp4
+
+# Historical, unused logo asset. The site uses KnightHacksOfficial.svg.
+public/home/experience/KnightHacks.svg

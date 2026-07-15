@@ -17,6 +17,7 @@ export type Project = {
   github: string;
   projectUrl: string;
   mdfile: string;
+  accent: string;
 };
 
 export const projects: Record<string, Project> = {
@@ -42,15 +43,15 @@ export const projects: Record<string, Project> = {
       "Docker",
     ],
     pictures: [
-      "/home/projects/CrisisLens/CrisisLens1.png",
-      "/home/projects/CrisisLens/CrisisLens2.png",
-      "/home/projects/CrisisLens/CrisisLens3.png",
-      "/home/projects/CrisisLens/CrisisLens4.png",
-      "/home/projects/CrisisLens/CrisisLens5.png",
+      "/home/projects/CrisisLens/CrisisLens1.webp",
+      "/home/projects/CrisisLens/CrisisLens2.webp",
+      "/home/projects/CrisisLens/CrisisLens3.webp",
+      "/home/projects/CrisisLens/CrisisLens4.webp",
+      "/home/projects/CrisisLens/CrisisLens5.webp",
     ],
     bordercolor: "border-cyan-400",
-    startvid: "/home/projects/CrisisLens/CrisisLens_demo.mp4",
-    startimg: "/home/projects/CrisisLens/CrisisLens1.png",
+    startvid: "/home/projects/CrisisLens/CrisisLens_preview.mp4",
+    startimg: "/home/projects/CrisisLens/CrisisLens1.webp",
     location: "Hacklytics 2026",
     short_desc:
       "A Databricks-powered humanitarian intelligence platform that helps teams prioritize countries using natural-language analytics, simulations, and a 3D crisis command center.",
@@ -60,6 +61,7 @@ export const projects: Record<string, Project> = {
     github: "",
     projectUrl: "https://devpost.com/software/crisislens-rlebdw",
     mdfile: "./Projects/CrisisLens.md",
+    accent: "#22d3ee",
   },
   slaide: {
     slug: "slaide",
@@ -80,15 +82,15 @@ export const projects: Record<string, Project> = {
       "TypeScript",
     ],
     pictures: [
-      "/home/projects/slAIde/slAIde1.png",
-      "/home/projects/slAIde/slAIde2.png",
-      "/home/projects/slAIde/slAIde3.png",
-      "/home/projects/slAIde/slAIde4.png",
-      "/home/projects/slAIde/slAIde5.png",
+      "/home/projects/slAIde/slAIde1.webp",
+      "/home/projects/slAIde/slAIde2.webp",
+      "/home/projects/slAIde/slAIde3.webp",
+      "/home/projects/slAIde/slAIde4.webp",
+      "/home/projects/slAIde/slAIde5.webp",
     ],
     bordercolor: "border-orange-400",
-    startvid: "/home/projects/slAIde/slAIde_demo.mp4",
-    startimg: "/home/projects/slAIde/slAIde1.png",
+    startvid: "/home/projects/slAIde/slAIde_preview.mp4",
+    startimg: "/home/projects/slAIde/slAIde1.webp",
     location: "Knight Hacks VIII",
     short_desc:
       "A multi-agent presentation and PDF generator that turns a single prompt into polished HTML5 slide decks or LaTeX-compiled summaries using Google ADK and A2A.",
@@ -98,6 +100,7 @@ export const projects: Record<string, Project> = {
     github: "https://github.com/Jomak-x/slAIde.git",
     projectUrl: "https://devpost.com/software/slaide",
     mdfile: "./Projects/slAIde.md",
+    accent: "#fb923c",
   },
   focusforge: {
     slug: "focusforge",
@@ -118,16 +121,16 @@ export const projects: Record<string, Project> = {
       "JSON",
     ],
     pictures: [
-      "/home/projects/FocusForge/FocusForge1.png",
-      "/home/projects/FocusForge/FocusForge2.png",
-      "/home/projects/FocusForge/FocusForge3.png",
-      "/home/projects/FocusForge/FocusForge4.png",
-      "/home/projects/FocusForge/FocusForge5.png",
-      "/home/projects/FocusForge/FocusForge6.png",
+      "/home/projects/FocusForge/FocusForge.webp",
+      "/home/projects/FocusForge/FocusForge2.webp",
+      "/home/projects/FocusForge/FocusForge3.webp",
+      "/home/projects/FocusForge/FocusForge4.webp",
+      "/home/projects/FocusForge/FocusForge5.webp",
+      "/home/projects/FocusForge/FocusForge6.webp",
     ],
     startvid: "",
     bordercolor: "border-blue-400",
-    startimg: "/home/projects/FocusForge/FocusForge1_v3.png",
+    startimg: "/home/projects/FocusForge/FocusForge1_v3.webp",
     location: "GemiKnights Hackathon",
     short_desc:
       "An AI-powered Chrome extension that turns focus sessions into honest reflection, session reports, and Gemini-powered productivity advice.",
@@ -137,6 +140,7 @@ export const projects: Record<string, Project> = {
     github: "https://github.com/Jomak-x/GeminKnights-FocusForge.git",
     projectUrl: "https://devpost.com/software/focusforge-g1oq60",
     mdfile: "./Projects/FocusForge.md",
+    accent: "#60a5fa",
   },
   hiretune: {
     slug: "hiretune",
@@ -157,14 +161,14 @@ export const projects: Record<string, Project> = {
       "Discord OAuth",
     ],
     pictures: [
-      "/home/projects/HireTune/HireTune1.png",
-      "/home/projects/HireTune/HireTune2.png",
-      "/home/projects/HireTune/HireTune3.png",
-      "/home/projects/HireTune/HireTune4.png",
+      "/home/projects/HireTune/HireTune1.webp",
+      "/home/projects/HireTune/HireTune2.webp",
+      "/home/projects/HireTune/HireTune3.webp",
+      "/home/projects/HireTune/HireTune4.webp",
     ],
     bordercolor: "border-emerald-400",
-    startvid: "/home/projects/HireTune/HireTune_demo.mp4",
-    startimg: "/home/projects/HireTune/HireTune1.png",
+    startvid: "/home/projects/HireTune/HireTune_preview.mp4",
+    startimg: "/home/projects/HireTune/HireTune1.webp",
     location: "HackUSF 2025",
     short_desc:
       "An AI-powered resume tailoring and job-tracking platform that helps applicants generate ATS-aligned resumes, export polished PDFs, and manage applications faster.",
@@ -174,6 +178,7 @@ export const projects: Record<string, Project> = {
     github: "https://github.com/ThomasT-GitHub/HireTune.git",
     projectUrl: "https://devpost.com/software/hiretune",
     mdfile: "./Projects/HireTune.md",
+    accent: "#34d399",
   },
 };
 

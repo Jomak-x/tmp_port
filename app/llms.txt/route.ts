@@ -7,12 +7,13 @@ export function GET() {
 
 > Software engineer and Computer Science student at the University of Central Florida. Software Engineering & Developer Advocacy Intern at Twilio, Databricks Student Fellow, Google x BASTA Code2Career Fellow, and Knight Hacks engineer and organizer.
 
-## Primary pages
+## Canonical pages
 - [Home](${absoluteUrl("/")})
 - [Experience](${absoluteUrl("/experience")})
 - [Projects, courses, and certificates](${absoluteUrl("/projects")})
 - [Skills](${absoluteUrl("/skills")})
-- [Resume](${absoluteUrl("/home/Jakob_Laise_Resume.pdf")})
+- [Resume page](${absoluteUrl("/resume")})
+- [Resume PDF](${absoluteUrl("/home/Jakob_Laise_Resume.pdf")})
 
 ## Profiles
 - [GitHub](https://github.com/Jomak-x)

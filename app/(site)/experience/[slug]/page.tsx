@@ -2,6 +2,11 @@ import ExperienceDetail from "@/components/ExperienceDetail";
 import JsonLd from "@/components/JsonLd";
 import { experienceList, getExperience } from "@/data/experience";
 import { absoluteUrl, createPageMetadata } from "@/lib/site";
+import {
+  breadcrumbJsonLd,
+  personId,
+  websiteId,
+} from "@/lib/structured-data";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -31,6 +36,8 @@ export async function generateMetadata({
     title,
     description: experience.summary,
     path: `/experience/${experience.slug}`,
+    label: experience.company,
+    imageAlt: `${experience.role} at ${experience.company} — Jakob Laise experience`,
   });
 }
 
@@ -42,15 +49,19 @@ export default async function ExperiencePage({ params }: ExperiencePageProps) {
     notFound();
   }
 
+  const detailPath = `/experience/${experience.slug}`;
+  const detailUrl = absoluteUrl(detailPath);
+  const roleId = `${detailUrl}#role`;
   const roleJsonLd: Record<string, unknown> = {
-    "@context": "https://schema.org",
     "@type": "EmployeeRole",
+    "@id": roleId,
     name: `${experience.role} at ${experience.company}`,
     roleName: experience.role,
     startDate: experience.startDate,
     description: experience.summary,
-    url: absoluteUrl(`/experience/${experience.slug}`),
-    mainEntityOfPage: absoluteUrl(`/experience/${experience.slug}`),
+    url: detailUrl,
+    mainEntityOfPage: { "@id": `${detailUrl}#webpage` },
+    member: { "@id": personId() },
     worksFor: {
       "@type": "Organization",
       name: experience.company,
@@ -62,9 +73,35 @@ export default async function ExperiencePage({ params }: ExperiencePageProps) {
     roleJsonLd.endDate = experience.endDate;
   }
 
+  const experienceJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${detailUrl}#webpage`,
+        url: detailUrl,
+        name: `${experience.role} at ${experience.company} | Jakob Laise`,
+        description: experience.summary,
+        inLanguage: "en-US",
+        isPartOf: { "@id": websiteId() },
+        about: { "@id": roleId },
+        breadcrumb: { "@id": `${detailUrl}#breadcrumb` },
+      },
+      breadcrumbJsonLd([
+        { name: "Jakob Laise", path: "/" },
+        { name: "Experience", path: "/experience" },
+        {
+          name: `${experience.role} at ${experience.company}`,
+          path: detailPath,
+        },
+      ]),
+      roleJsonLd,
+    ],
+  };
+
   return (
     <>
-      <JsonLd data={roleJsonLd} />
+      <JsonLd data={experienceJsonLd} />
       <ExperienceDetail experience={experience} />
     </>
   );

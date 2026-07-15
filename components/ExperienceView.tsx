@@ -1,9 +1,10 @@
 "use client";
 
 import { experienceList, type Experience } from "@/data/experience";
-import { ArrowUpRight, Code2, ExternalLink, MapPin, X } from "lucide-react";
+import { ArrowUpRight, ExternalLink, MapPin, X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import ExperienceLogo from "./ExperienceLogo";
 
 export default function ExperienceView() {
@@ -11,6 +12,7 @@ export default function ExperienceView() {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (!selectedExperience) return;
@@ -27,7 +29,6 @@ export default function ExperienceView() {
       }
 
       if (event.key !== "Tab" || !dialogRef.current) return;
-
       const focusable = Array.from(
         dialogRef.current.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
@@ -55,135 +56,147 @@ export default function ExperienceView() {
   }, [selectedExperience]);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-20 pt-28 text-white sm:px-6 lg:px-8">
-      <header className="mb-14 max-w-3xl">
-        <p className="text-sm font-semibold uppercase tracking-[0.32em] text-orange-300/80">
-          Experience
+    <div className="page-shell text-[#f2eee6]">
+      <motion.header
+        initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reducedMotion ? 0 : 0.42 }}
+        className="grid gap-8 border-b border-white/15 pb-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-end"
+      >
+        <div>
+          <p className="eyebrow">Experience</p>
+          <h1 className="font-display mt-5 text-[clamp(2.75rem,13vw,5rem)] leading-[0.94] tracking-[-0.045em] lg:text-8xl">
+            Professional
+            <br />
+            <span className="text-[#f28c28]">experience.</span>
+          </h1>
+        </div>
+        <p className="max-w-xl text-lg leading-8 text-white/58 lg:justify-self-end">
+          Software engineering roles, fellowships, research, IT, and internship
+          experience.
         </p>
-        <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-          Building across developer platforms, data, AI, and research.
-        </h1>
-        <p className="mt-5 text-base leading-8 text-white/65 sm:text-lg">
-          A timeline of the companies, programs, labs, and technical communities
-          where I have shipped software, supported infrastructure, and helped
-          other builders succeed.
-        </p>
-      </header>
+      </motion.header>
 
-      <div className="relative">
-        <div className="absolute left-5 top-0 hidden h-full w-px bg-gradient-to-b from-orange-300/70 via-white/18 to-transparent md:block" />
+      <div className="relative mt-12">
+        <motion.div
+          className="absolute bottom-0 left-[5px] top-0 w-[2px] origin-top md:left-[13rem]"
+          style={{
+            background:
+              "linear-gradient(180deg,#f22f46 0%,#ff3621 18%,#4285f4 35%,#f59e0b 53%,#38bdf8 70%,#34d399 84%,#fb7185 100%)",
+          }}
+          initial={reducedMotion ? false : { scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, amount: 0.05 }}
+          transition={{ duration: reducedMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden="true"
+        />
 
-        <div className="grid gap-6">
-          {experienceList.map((experience) => (
-            <article key={experience.slug} className="relative md:ml-14">
+        <div>
+          {experienceList.map((experience, index) => (
+            <motion.article
+              key={experience.slug}
+              className="relative grid min-w-0 max-w-full pl-8 md:grid-cols-[11rem_minmax(0,1fr)] md:gap-16 md:pl-0"
+              style={{ "--experience-accent": experience.accent } as CSSProperties}
+              initial={reducedMotion ? false : { opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.18 }}
+              transition={{ duration: reducedMotion ? 0 : 0.42, delay: reducedMotion ? 0 : Math.min(index * 0.06, 0.24) }}
+            >
               <span
-                className="absolute -left-11 top-8 hidden h-4 w-4 rounded-full border-2 border-black md:block"
-                style={{ backgroundColor: experience.accent }}
+                className="absolute left-0 top-9 h-[11px] w-[11px] rounded-full border-2 border-[#0c0d0d] bg-[var(--experience-accent)] shadow-[0_0_18px_var(--experience-accent)] md:left-[calc(13rem-5px)]"
                 aria-hidden="true"
               />
+
+              <div className="pb-2 pt-7 md:text-right">
+                <p className="font-mono text-[10px] uppercase tracking-[0.15em] text-[var(--experience-accent)]">{experience.date}</p>
+                <p className="mt-2 text-xs text-white/32">{experience.location}</p>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setSelectedExperience(experience)}
                 aria-label={`Open a quick view of ${experience.role} at ${experience.company}`}
-                className={`group relative grid w-full gap-5 rounded-2xl border-2 ${experience.bordercolor} ${experience.bgcolor} p-5 text-left shadow-2xl shadow-black/15 transition duration-300 hover:-translate-y-1 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-orange-300 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:p-6`}
+                className="group relative grid min-w-0 max-w-full gap-7 border-t border-white/15 py-7 pl-4 text-left transition hover:border-[var(--experience-accent)] focus:border-[var(--experience-accent)] focus:outline-none sm:pl-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.85fr)]"
               >
-                <div className="flex min-w-0 gap-4">
+                <div className="flex min-w-0 gap-5">
                   <ExperienceLogo experience={experience} />
                   <div className="min-w-0">
-                    <p className={`${experience.textcolor} text-sm font-semibold`}>
-                      {experience.date}
-                    </p>
-                    <h2 className="mt-2 text-2xl font-bold text-white">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-white/38">{experience.company}</p>
+                    <h2 className="font-display mt-2 break-words text-[clamp(1.65rem,7vw,2.25rem)] leading-[1.08] text-[#f2eee6] transition [overflow-wrap:anywhere] group-hover:text-[var(--experience-accent)]">
                       {experience.role}
                     </h2>
-                    <p className="mt-2 text-sm text-white/55">
-                      {experience.company}
-                    </p>
                   </div>
                 </div>
 
-                <div className="flex min-w-0 flex-col">
-                  <p className="text-base leading-7 text-white/75">
-                    {experience.summary}
+                <div className="min-w-0">
+                  <p className="text-base leading-7 text-white/58">{experience.summary}</p>
+                  <p className="mt-5 font-mono text-[10px] uppercase leading-5 tracking-[0.12em] text-white/32">
+                    {experience.technologies.slice(0, 7).join(" · ")}
                   </p>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-white/50">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span>{experience.location}</span>
-                  </div>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {experience.technologies.slice(0, 4).map((technology) => (
-                      <span
-                        key={technology}
-                        className={`rounded-full border px-3 py-1 text-xs text-white/80 ${experience.bordercolor}`}
-                      >
-                        {technology}
-                      </span>
-                    ))}
-                    {experience.technologies.length > 4 && (
-                      <span
-                        className={`rounded-full border px-3 py-1 text-xs text-white/80 ${experience.bordercolor}`}
-                      >
-                        +{experience.technologies.length - 4}
-                      </span>
-                    )}
-                  </div>
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm text-[var(--experience-accent)]">
+                    Quick view
+                    <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </span>
                 </div>
-
-                <span className="absolute right-5 top-5 hidden items-center gap-2 text-xs uppercase tracking-[0.22em] text-white/35 transition group-hover:text-white/75 sm:flex">
-                  Quick view
-                  <ArrowUpRight className="h-4 w-4" />
-                </span>
-                <span className="absolute bottom-5 right-5 text-white/20" aria-hidden="true">
-                  <Code2 className="h-5 w-5" />
-                </span>
               </button>
-            </article>
+
+              <Link
+                href={`/experience/${experience.slug}`}
+                aria-label={`Open the permanent page for ${experience.role} at ${experience.company}`}
+                className="col-start-1 mb-8 -mt-3 ml-4 inline-flex w-fit items-center gap-2 font-mono text-[10px] uppercase tracking-[0.13em] text-white/34 transition hover:text-[var(--experience-accent)] focus:outline-none sm:ml-0 md:col-start-2"
+              >
+                Permanent role page
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </motion.article>
           ))}
         </div>
       </div>
 
       {selectedExperience && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md sm:p-8"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm sm:p-8"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget) setSelectedExperience(null);
           }}
         >
-          <div
+          <motion.div
             ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby={`experience-dialog-${selectedExperience.slug}`}
             aria-describedby={`experience-dialog-summary-${selectedExperience.slug}`}
-            className={`relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-3xl border-2 ${selectedExperience.bordercolor} bg-zinc-950 p-6 shadow-2xl shadow-black sm:p-8`}
+            initial={reducedMotion ? false : { opacity: 0, y: 14, scale: 0.99 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: reducedMotion ? 0 : 0.3 }}
+            style={{
+              "--experience-accent": selectedExperience.accent,
+              boxShadow: `16px 16px 0 ${selectedExperience.accent}24`,
+            } as CSSProperties}
+            className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto border border-[var(--experience-accent)]/60 bg-[#101212] p-6 sm:p-9"
           >
             <button
               ref={closeButtonRef}
               type="button"
               onClick={() => setSelectedExperience(null)}
-              className="absolute right-4 top-4 rounded-full border border-white/15 bg-white/5 p-2 text-white/70 transition hover:bg-white/12 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="absolute right-4 top-4 border border-white/15 p-2 text-white/60 transition hover:border-[var(--experience-accent)] hover:text-[var(--experience-accent)] focus:outline-none"
               aria-label="Close experience details"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div className="flex flex-col gap-6 pr-10 sm:flex-row sm:items-center">
+            <div className="grid gap-7 pr-10 sm:grid-cols-[auto_1fr] sm:items-center">
               <ExperienceLogo experience={selectedExperience} large />
               <div>
-                <p className={`${selectedExperience.textcolor} text-sm font-semibold`}>
-                  {selectedExperience.date}
-                </p>
-                <h2
-                  id={`experience-dialog-${selectedExperience.slug}`}
-                  className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl"
-                >
+                <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.25em] text-[var(--experience-accent)]">{selectedExperience.date}</p>
+                <h2 id={`experience-dialog-${selectedExperience.slug}`} className="font-display mt-3 break-words text-[clamp(2rem,9vw,3rem)] leading-tight [overflow-wrap:anywhere]">
                   {selectedExperience.role}
                 </h2>
                 <a
                   href={selectedExperience.organizationUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-2 inline-flex items-center gap-2 text-base text-white/60 transition hover:text-orange-300"
+                  className="mt-3 inline-flex items-center gap-2 text-sm text-white/48 transition hover:text-[var(--experience-accent)]"
                 >
                   {selectedExperience.company}
                   <ExternalLink className="h-4 w-4" />
@@ -191,56 +204,37 @@ export default function ExperienceView() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 border-y border-white/10 py-4 text-sm text-white/55">
+            <div className="mt-8 border-y border-white/12 py-4 font-mono text-[10px] uppercase tracking-[0.14em] text-white/38">
               <span className="inline-flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+                <MapPin className="h-4 w-4 text-[var(--experience-accent)]" />
                 {selectedExperience.location}
               </span>
             </div>
 
-            <p
-              id={`experience-dialog-summary-${selectedExperience.slug}`}
-              className="mt-7 text-lg leading-8 text-white/75"
-            >
+            <p id={`experience-dialog-summary-${selectedExperience.slug}`} className="mt-7 text-lg leading-8 text-white/68">
               {selectedExperience.summary}
             </p>
 
-            <section className="mt-8" aria-labelledby={`experience-highlights-${selectedExperience.slug}`}>
-              <h3
-                id={`experience-highlights-${selectedExperience.slug}`}
-                className="text-sm font-semibold uppercase tracking-[0.24em] text-white/45"
-              >
-                Highlights
-              </h3>
-              <ul className="mt-4 space-y-4">
-                {selectedExperience.highlights.map((highlight) => (
-                  <li key={highlight} className="flex gap-3 text-base leading-7 text-white/75">
-                    <span
-                      className="mt-2.5 h-2 w-2 shrink-0 rounded-full"
-                      style={{ backgroundColor: selectedExperience.accent }}
-                      aria-hidden="true"
-                    />
+            <section className="mt-9" aria-labelledby={`experience-highlights-${selectedExperience.slug}`}>
+              <h3 id={`experience-highlights-${selectedExperience.slug}`} className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.25em] text-[var(--experience-accent)]">Highlights</h3>
+              <ul className="mt-4">
+                {selectedExperience.highlights.map((highlight, index) => (
+                  <li key={highlight} className="grid grid-cols-[2rem_1fr] gap-3 border-t border-white/12 py-4 text-base leading-7 text-white/64">
+                    <span className="font-mono text-[10px] text-[var(--experience-accent)]">{String(index + 1).padStart(2, "0")}</span>
                     <span>{highlight}</span>
                   </li>
                 ))}
               </ul>
             </section>
 
-            <div className="mt-8 flex flex-wrap gap-2">
-              {selectedExperience.technologies.map((technology) => (
-                <span
-                  key={technology}
-                  className={`rounded-full border px-3 py-1.5 text-sm text-white/75 ${selectedExperience.bordercolor}`}
-                >
-                  {technology}
-                </span>
-              ))}
-            </div>
+            <p className="mt-7 border-t border-white/12 pt-5 font-mono text-[10px] uppercase leading-6 tracking-[0.12em] text-white/34">
+              {selectedExperience.technologies.join(" · ")}
+            </p>
 
-            <div className="mt-9 flex flex-wrap gap-3 border-t border-white/10 pt-6">
+            <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 href={`/experience/${selectedExperience.slug}`}
-                className="inline-flex items-center gap-2 rounded-full bg-orange-400 px-5 py-2.5 font-semibold text-black transition hover:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-200"
+                className="inline-flex items-center gap-2 border border-[var(--experience-accent)] bg-[var(--experience-accent)] px-5 py-3 text-sm font-semibold text-[#0c0d0d] transition hover:brightness-110"
               >
                 Open full page
                 <ArrowUpRight className="h-4 w-4" />
@@ -248,12 +242,12 @@ export default function ExperienceView() {
               <button
                 type="button"
                 onClick={() => setSelectedExperience(null)}
-                className="rounded-full border border-white/15 px-5 py-2.5 font-semibold text-white/75 transition hover:bg-white/8 hover:text-white focus:outline-none focus:ring-2 focus:ring-orange-300"
+                className="border border-white/15 px-5 py-3 text-sm text-white/65 transition hover:border-white/40 hover:text-white"
               >
                 Close
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       )}
     </div>

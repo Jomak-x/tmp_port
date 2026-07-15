@@ -18,7 +18,7 @@ type CarouselProps = {
 export default function ImageCarousel({
   children,
   className = "",
-  wrapperClassName = "m-5",
+  wrapperClassName = "",
   boxWidth = "min(92vw, 520px)",
   boxHeight = 320,
   autoSlide = false,
@@ -60,11 +60,11 @@ export default function ImageCarousel({
 
   return (
     <div
-      className={`${wrapperClassName} rounded-3xl border-4 ${bordercolor} bg-black/10 shadow-lg`}
+      className={`${wrapperClassName} border ${bordercolor} bg-black`}
       style={{ width: resolvedWidth, height: resolvedHeight }}
     >
       <div
-        className={`relative h-full w-full overflow-hidden rounded-2xl ${className}`}
+        className={`relative h-full w-full overflow-hidden ${className}`}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onFocusCapture={() => setIsPaused(true)}
@@ -87,7 +87,7 @@ export default function ImageCarousel({
               <button
                 type="button"
                 onClick={prev}
-                className="pointer-events-auto shadow bg-white/80 text-orange-400 p-1.5 rounded-full hover:bg-white"
+                className="pointer-events-auto border border-white/20 bg-black/70 p-2 text-white transition hover:border-[#f28c28] hover:text-[#f28c28]"
                 aria-label="Previous slide"
               >
                 <FaArrowLeft size={20} />
@@ -95,7 +95,7 @@ export default function ImageCarousel({
               <button
                 type="button"
                 onClick={next}
-                className="pointer-events-auto shadow bg-white/80 text-orange-400 p-1.5 rounded-full hover:bg-white"
+                className="pointer-events-auto border border-white/20 bg-black/70 p-2 text-white transition hover:border-[#f28c28] hover:text-[#f28c28]"
                 aria-label="Next slide"
               >
                 <FaArrowRight size={20} />
@@ -111,8 +111,8 @@ export default function ImageCarousel({
                     key={i}
                     type="button"
                     onClick={() => setCurr(i)}
-                    className={`transition-all w-3 h-3 rounded-full ${
-                      safeCurr === i ? "scale-125 bg-white" : "bg-white/50"
+                    className={`h-1 transition-all ${
+                      safeCurr === i ? "w-8 bg-[#f28c28]" : "w-4 bg-white/45"
                     }`}
                     aria-label={`Go to slide ${i + 1}`}
                   />

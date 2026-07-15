@@ -91,10 +91,16 @@ function createBubble(
   topBound: number
 ): RuntimeBubble {
   const skill = skills[index];
+  const labelBoost = Math.max(0, skill.label.length - 7) * 0.9;
+  const calculatedRadius =
+    (compact ? 25 : 36) +
+    skill.intensity * (compact ? 6 : 11) +
+    skill.bubbleScale * (compact ? 3 : 4) +
+    labelBoost;
+  const labelRadiusFloor =
+    (compact ? 24 : 40) + skill.label.length * (compact ? 1.6 : 2.2);
   const baseRadius = Math.round(
-    (compact ? 36 : 44) +
-      skill.intensity * (compact ? 11 : 15) +
-      skill.bubbleScale * 6
+    Math.max(calculatedRadius, labelRadiusFloor)
   );
 
   return {
@@ -115,6 +121,63 @@ function createBubble(
     rotation: randomRange(-8, 8),
     rotationVelocity: randomRange(-0.04, 0.04),
   };
+}
+
+function settleBubbles(
+  bubbles: RuntimeBubble[],
+  width: number,
+  height: number,
+  topBound: number,
+  edgePadding: number
+) {
+  // Resolve the random starting layout before the first paint. This prevents a
+  // crowded flash on slower phones and means labels never begin on top of one
+  // another while the animation loop is warming up.
+  for (let iteration = 0; iteration < 24; iteration += 1) {
+    for (let i = 0; i < bubbles.length; i += 1) {
+      const first = bubbles[i];
+
+      for (let j = i + 1; j < bubbles.length; j += 1) {
+        const second = bubbles[j];
+        let dx = second.x - first.x;
+        let dy = second.y - first.y;
+        let distance = Math.hypot(dx, dy);
+        const minimumDistance = (first.radius + second.radius) * 0.94;
+
+        if (distance >= minimumDistance) {
+          continue;
+        }
+
+        if (distance < 0.001) {
+          const angle = ((i * 37 + j * 17) % 360) * (Math.PI / 180);
+          dx = Math.cos(angle);
+          dy = Math.sin(angle);
+          distance = 1;
+        }
+
+        const overlap = minimumDistance - distance;
+        const normalX = dx / distance;
+        const normalY = dy / distance;
+        first.x -= normalX * overlap * 0.5;
+        first.y -= normalY * overlap * 0.5;
+        second.x += normalX * overlap * 0.5;
+        second.y += normalY * overlap * 0.5;
+      }
+    }
+
+    for (const bubble of bubbles) {
+      bubble.x = clamp(
+        bubble.x,
+        bubble.radius + edgePadding,
+        width - bubble.radius - edgePadding
+      );
+      bubble.y = clamp(
+        bubble.y,
+        topBound + bubble.radius + edgePadding,
+        height - bubble.radius - edgePadding
+      );
+    }
+  }
 }
 
 function respawnBubble(
@@ -140,11 +203,26 @@ function respawnBubble(
   bubble.rotationVelocity = randomRange(-0.03, 0.03);
 }
 
+function getLabelClass(label: string) {
+  const length = label.replace(/\s/g, "").length;
+
+  if (length >= 11) {
+    return "text-[0.46rem] leading-[1.05] tracking-[0.02em] min-[901px]:text-[0.76rem] min-[901px]:tracking-[0.1em]";
+  }
+
+  if (length >= 9) {
+    return "text-[0.5rem] leading-[1.08] tracking-[0.035em] min-[901px]:text-[0.8rem] min-[901px]:tracking-[0.12em]";
+  }
+
+  return "text-[0.56rem] leading-[1.1] tracking-[0.06em] min-[901px]:text-[0.86rem] min-[901px]:tracking-[0.14em]";
+}
+
 export default function SkillsPlayground() {
   const [compact, setCompact] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const fieldRef = useRef<HTMLDivElement | null>(null);
+  const headerRef = useRef<HTMLDivElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
   const bubbleRefs = useRef<Array<HTMLDivElement | null>>([]);
   const runtimeRef = useRef<RuntimeBubble[]>([]);
@@ -182,20 +260,31 @@ export default function SkillsPlayground() {
 
   useEffect(() => {
     const field = fieldRef.current;
-    const glow = glowRef.current;
-
     if (!field) {
       return;
     }
 
     const resetBubbles = () => {
       const rect = field.getBoundingClientRect();
-      const topBound = compact ? 182 : 212;
+      const headerBottom = headerRef.current
+        ? headerRef.current.getBoundingClientRect().bottom - rect.top
+        : compact
+          ? 420
+          : 200;
+      const topBound = Math.ceil(headerBottom + (compact ? 16 : 10));
 
       boundsRef.current = { width: rect.width, height: rect.height, topBound };
-      runtimeRef.current = skills.map((_, index) =>
+      const nextBubbles = skills.map((_, index) =>
         createBubble(index, rect.width, rect.height, compact, topBound)
       );
+      settleBubbles(
+        nextBubbles,
+        rect.width,
+        rect.height,
+        topBound,
+        compact ? 6 : 10
+      );
+      runtimeRef.current = nextBubbles;
     };
 
     resetBubbles();
@@ -240,13 +329,15 @@ export default function SkillsPlayground() {
       const dt = Math.max(event.timeStamp - drag.lastTime, 16);
       const nextX = clamp(
         pointerX + drag.offsetX,
-        bubble.baseRadius,
-        rect.width - bubble.baseRadius
+        bubble.baseRadius + (compact ? 6 : 10),
+        rect.width - bubble.baseRadius - (compact ? 6 : 10)
       );
       const nextY = clamp(
         pointerY + drag.offsetY,
-        0,
-        rect.height - bubble.baseRadius * 0.4
+        boundsRef.current.topBound +
+          bubble.baseRadius +
+          (compact ? 6 : 10),
+        rect.height - bubble.baseRadius - (compact ? 6 : 10)
       );
 
       const instantVx = ((nextX - bubble.x) / dt) * (16.666 / 4.1);
@@ -309,14 +400,41 @@ export default function SkillsPlayground() {
     window.addEventListener("pointercancel", handlePointerEnd);
 
     let lastTime = 0;
+    let fieldIsVisible = true;
+    let stopped = false;
+
+    const stopLoop = () => {
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+    };
+
+    const scheduleLoop = () => {
+      if (
+        !stopped &&
+        fieldIsVisible &&
+        document.visibilityState === "visible" &&
+        frameRef.current === null
+      ) {
+        frameRef.current = window.requestAnimationFrame(render);
+      }
+    };
 
     const render = (timestamp: number) => {
+      frameRef.current = null;
       const { width, height, topBound } = boundsRef.current;
-      const motionScale = reducedMotion ? 0.38 : 1;
-      const pointer = pointerRef.current;
+      const motionScale = reducedMotion ? 0 : 1;
+      const edgePadding = compact ? 6 : 10;
 
       if (!width || !height) {
-        frameRef.current = window.requestAnimationFrame(render);
+        scheduleLoop();
+        return;
+      }
+
+      const minimumFrameTime = reducedMotion ? 100 : compact ? 33 : 16;
+      if (lastTime && timestamp - lastTime < minimumFrameTime) {
+        scheduleLoop();
         return;
       }
 
@@ -328,6 +446,70 @@ export default function SkillsPlayground() {
       lastTime = timestamp;
       timeRef.current = timestamp;
 
+      const activeFilter = activeCategoryRef.current;
+      for (let i = 0; i < runtimeRef.current.length; i += 1) {
+        const first = runtimeRef.current[i];
+        if (
+          first.state === "popped" ||
+          (activeFilter && skills[i].category !== activeFilter)
+        ) {
+          continue;
+        }
+
+        for (let j = i + 1; j < runtimeRef.current.length; j += 1) {
+          const second = runtimeRef.current[j];
+          if (
+            second.state === "popped" ||
+            (activeFilter && skills[j].category !== activeFilter)
+          ) {
+            continue;
+          }
+
+          let dx = second.x - first.x;
+          let dy = second.y - first.y;
+          let distance = Math.hypot(dx, dy);
+          const minimumDistance = (first.radius + second.radius) * 0.92;
+
+          if (distance >= minimumDistance) {
+            continue;
+          }
+
+          if (distance < 0.001) {
+            dx = 1;
+            dy = 0;
+            distance = 1;
+          }
+
+          const normalX = dx / distance;
+          const normalY = dy / distance;
+          const overlap = minimumDistance - distance;
+
+          if (first.state === "dragging") {
+            second.x += normalX * overlap;
+            second.y += normalY * overlap;
+          } else if (second.state === "dragging") {
+            first.x -= normalX * overlap;
+            first.y -= normalY * overlap;
+          } else {
+            first.x -= normalX * overlap * 0.5;
+            first.y -= normalY * overlap * 0.5;
+            second.x += normalX * overlap * 0.5;
+            second.y += normalY * overlap * 0.5;
+          }
+
+          const relativeVelocity =
+            (second.vx - first.vx) * normalX +
+            (second.vy - first.vy) * normalY;
+          if (relativeVelocity < 0) {
+            const impulse = relativeVelocity * 0.55;
+            first.vx += impulse * normalX;
+            first.vy += impulse * normalY;
+            second.vx -= impulse * normalX;
+            second.vy -= impulse * normalY;
+          }
+        }
+      }
+
       for (let i = 0; i < runtimeRef.current.length; i += 1) {
         const bubble = runtimeRef.current[i];
         const skill = skills[i];
@@ -337,7 +519,7 @@ export default function SkillsPlayground() {
           continue;
         }
 
-        if (bubble.state === "floating") {
+        if (bubble.state === "floating" && !reducedMotion) {
           bubble.vx +=
             Math.sin(timestamp * 0.00013 * motionScale + bubble.phase) *
             0.0019 *
@@ -434,11 +616,26 @@ export default function SkillsPlayground() {
           bubble.vy = clampedVelocity.y;
         }
 
-        if (bubble.state !== "dragging") {
-          if (bubble.x < -bubble.baseRadius) {
-            bubble.x = width + bubble.baseRadius * 0.9;
-          } else if (bubble.x > width + bubble.baseRadius) {
-            bubble.x = -bubble.baseRadius * 0.9;
+        if (
+          bubble.state === "floating" &&
+          bubble.y < topBound + bubble.radius + edgePadding
+        ) {
+          bubble.y = topBound + bubble.radius + edgePadding;
+          bubble.vy = Math.abs(bubble.vy) + 0.02;
+        }
+
+        if (bubble.state === "floating") {
+          if (bubble.x < bubble.radius + edgePadding) {
+            bubble.x = bubble.radius + edgePadding;
+            bubble.vx = Math.abs(bubble.vx);
+          } else if (bubble.x > width - bubble.radius - edgePadding) {
+            bubble.x = width - bubble.radius - edgePadding;
+            bubble.vx = -Math.abs(bubble.vx);
+          }
+
+          if (bubble.y > height - bubble.radius - edgePadding) {
+            bubble.y = height - bubble.radius - edgePadding;
+            bubble.vy = -Math.abs(bubble.vy);
           }
         }
 
@@ -482,7 +679,6 @@ export default function SkillsPlayground() {
             : 1);
         const opacity =
           bubble.state === "popped" ? 0.96 - sinkProgress * 0.32 : 1;
-        const activeFilter = activeCategoryRef.current;
         const filteredOut =
           activeFilter !== null && skill.category !== activeFilter;
         const blur =
@@ -529,7 +725,6 @@ export default function SkillsPlayground() {
         node.style.visibility = filteredOut ? "hidden" : "visible";
         node.style.pointerEvents = filteredOut ? "none" : "auto";
         node.style.filter = `blur(${blur})`;
-        node.style.boxShadow = `0 20px 48px ${skill.glow}, inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -16px 26px rgba(3,7,18,0.28)`;
         node.style.zIndex = filteredOut
           ? "1"
           : bubble.state === "dragging"
@@ -548,33 +743,46 @@ export default function SkillsPlayground() {
         node.style.setProperty("--bubble-wake-scale", wakeScale);
       }
 
-      if (glow) {
-        const glowX = pointer.inside ? pointer.x : width * 0.5;
-        const glowY = pointer.inside ? pointer.y : height * 0.55;
-
-        glow.style.background = `radial-gradient(340px circle at ${glowX}px ${glowY}px, rgba(255,255,255,${
-          pointer.inside ? 0.07 : 0.035
-        }), transparent 56%), radial-gradient(540px circle at ${glowX}px ${glowY}px, rgba(79,140,255,${
-          pointer.inside ? 0.09 : 0.04
-        }), transparent 64%), radial-gradient(760px circle at ${
-          width * 0.5
-        }px ${height * 0.88}px, rgba(255,79,179,0.06), transparent 62%)`;
-      }
-
-      frameRef.current = window.requestAnimationFrame(render);
+      scheduleLoop();
     };
 
-    frameRef.current = window.requestAnimationFrame(render);
+    const intersectionObserver = new IntersectionObserver(
+      ([entry]) => {
+        fieldIsVisible = entry.isIntersecting;
+        if (fieldIsVisible) {
+          scheduleLoop();
+        } else {
+          stopLoop();
+        }
+      },
+      { rootMargin: "120px 0px" },
+    );
+    intersectionObserver.observe(field);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        lastTime = 0;
+        scheduleLoop();
+      } else {
+        stopLoop();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    // Paint a complete first frame immediately. requestAnimationFrame is paused
+    // in background tabs, but the bubbles should still have stable dimensions
+    // and positions before the page becomes visible.
+    render(performance.now());
 
     return () => {
+      stopped = true;
       observer.disconnect();
+      intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerEnd);
       window.removeEventListener("pointercancel", handlePointerEnd);
 
-      if (frameRef.current) {
-        window.cancelAnimationFrame(frameRef.current);
-      }
+      stopLoop();
     };
   }, [compact, reducedMotion]);
 
@@ -591,6 +799,19 @@ export default function SkillsPlayground() {
     pointerRef.current.inside = true;
     pointerRef.current.x = event.clientX - rect.left;
     pointerRef.current.y = event.clientY - rect.top;
+    const glow = glowRef.current;
+    if (glow) {
+      glow.style.background = `radial-gradient(340px circle at ${pointerRef.current.x}px ${pointerRef.current.y}px, rgba(255,255,255,0.07), transparent 56%), radial-gradient(540px circle at ${pointerRef.current.x}px ${pointerRef.current.y}px, rgba(79,140,255,0.09), transparent 64%)`;
+    }
+  };
+
+  const handleFieldPointerLeave = () => {
+    pointerRef.current.inside = false;
+    const glow = glowRef.current;
+    if (glow) {
+      glow.style.background =
+        "radial-gradient(540px circle at 50% 55%, rgba(79,140,255,0.04), transparent 64%)";
+    }
   };
 
   const handleBubblePointerDown = (
@@ -630,6 +851,31 @@ export default function SkillsPlayground() {
     };
   };
 
+  const handleBubbleKeyDown = (
+    index: number,
+    event: React.KeyboardEvent<HTMLDivElement>
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    const bubble = runtimeRef.current[index];
+
+    if (!bubble || bubble.state === "popped" || bubble.state === "dragging") {
+      return;
+    }
+
+    bubble.state = "popped";
+    bubble.previousState = "popped";
+    bubble.popAt = timeRef.current;
+    bubble.respawnAt = timeRef.current + (compact ? 3000 : 3600);
+    bubble.vx *= 0.3;
+    bubble.vy = Math.max(0.08, Math.abs(bubble.vy) * 0.3);
+    bubble.rotationVelocity += randomRange(-0.16, 0.16);
+    bubble.pressure = 1;
+  };
+
   const ringStyle: CSSProperties = {
     transform: "scale(var(--bubble-ring-scale, 1))",
     opacity: "var(--bubble-ring-opacity, 0)",
@@ -658,22 +904,24 @@ export default function SkillsPlayground() {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#080816] text-white">
+    <div className="min-h-[200svh] overflow-hidden bg-[#080816] text-white md:min-h-screen">
       <section
         ref={fieldRef}
         onPointerMove={handleFieldPointerMove}
         onPointerEnter={handleFieldPointerMove}
-        onPointerLeave={() => {
-          pointerRef.current.inside = false;
-        }}
-        className="relative min-h-screen touch-none overflow-hidden"
+        onPointerLeave={handleFieldPointerLeave}
+        className="relative min-h-[200svh] touch-none overflow-hidden md:min-h-screen"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(114,84,255,0.18),transparent_24%),radial-gradient(circle_at_18%_24%,rgba(84,157,255,0.18),transparent_24%),radial-gradient(circle_at_82%_14%,rgba(255,98,185,0.16),transparent_22%),radial-gradient(circle_at_50%_92%,rgba(255,169,71,0.12),transparent_28%),linear-gradient(180deg,rgba(10,11,30,0.98),rgba(5,7,18,1))]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.24),transparent_26%),radial-gradient(circle_at_14%_28%,rgba(84,157,255,0.2),transparent_25%),radial-gradient(circle_at_84%_17%,rgba(255,98,185,0.18),transparent_23%),radial-gradient(circle_at_52%_94%,rgba(255,169,71,0.16),transparent_30%),linear-gradient(180deg,rgba(12,10,28,0.99),rgba(5,7,18,1))]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:58px_58px] opacity-25" />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.08),transparent_24%)]" />
         <div
           ref={glowRef}
           className="pointer-events-none absolute inset-0 transition-opacity duration-300"
+          style={{
+            background:
+              "radial-gradient(540px circle at 50% 55%, rgba(79,140,255,0.04), transparent 64%)",
+          }}
         />
 
         {STAR_POINTS.map((star, index) => (
@@ -693,19 +941,19 @@ export default function SkillsPlayground() {
           />
         ))}
 
-        <div className="relative z-10 px-5 pb-4 pt-26 text-center md:px-8 md:pt-32">
-          <p className="text-[0.76rem] uppercase tracking-[0.46em] text-white/42 md:text-[0.88rem]">
-            Space Bubbles
+        <div ref={headerRef} className="relative z-10 px-4 pb-2 pt-24 text-center md:px-8 md:pt-24">
+          <p className="text-[0.68rem] uppercase tracking-[0.34em] text-white/42 md:text-[0.72rem]">
+            Technical skills
           </p>
-          <h1 className="mt-3 text-[2.15rem] font-semibold tracking-tight text-white md:text-[3.5rem]">
+          <h1 className="mt-1.5 text-[2rem] font-semibold leading-none tracking-tight text-white md:text-[2.75rem]">
             Skills
           </h1>
-          <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/62 md:text-lg">
-            Technical skills pulled from my resume, grouped by the places I use
-            them most.
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-white/62 md:text-base">
+            Programming languages, frameworks, tools, coursework, and spoken
+            languages from my current resume.
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-3 text-sm text-white/72">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-white/72 md:gap-x-5">
             {skillClusters.map((cluster) => (
               <button
                 key={cluster.category}
@@ -715,7 +963,7 @@ export default function SkillsPlayground() {
                     current === cluster.category ? null : cluster.category
                   )
                 }
-                className={`flex items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${
+                className={`flex items-center gap-1.5 rounded-full border px-2.5 py-1 transition-colors ${
                   activeCategory === cluster.category
                     ? "bg-white/8"
                     : "border-transparent bg-transparent hover:border-white/10 hover:bg-white/6"
@@ -737,7 +985,7 @@ export default function SkillsPlayground() {
                 }}
               >
                 <span
-                  className="h-2.5 w-2.5 rounded-full"
+                  className="h-2 w-2 rounded-full"
                   style={{
                     backgroundColor: cluster.accent,
                     boxShadow: `0 0 20px ${cluster.accent}`,
@@ -749,7 +997,7 @@ export default function SkillsPlayground() {
             <button
               type="button"
               onClick={() => setActiveCategory(null)}
-              className={`rounded-full border px-3 py-1.5 transition-colors ${
+              className={`rounded-full border px-2.5 py-1 transition-colors ${
                 activeCategory === null
                   ? "border-white/18 bg-white/10 text-white"
                   : "border-transparent bg-transparent text-white/62 hover:border-white/10 hover:bg-white/6"
@@ -771,11 +1019,13 @@ export default function SkillsPlayground() {
               bubbleRefs.current[index] = node;
             }}
             onPointerDown={(event) => handleBubblePointerDown(index, event)}
-            className="absolute left-0 top-0 flex cursor-grab select-none items-center justify-center rounded-full border border-white/18 px-4 text-center text-white backdrop-blur-[2px] will-change-transform active:cursor-grabbing"
+            onKeyDown={(event) => handleBubbleKeyDown(index, event)}
+            className="absolute left-0 top-0 flex cursor-grab select-none items-center justify-center rounded-full border border-white/18 px-1 text-center text-white will-change-transform active:cursor-grabbing min-[901px]:px-4"
             style={{
               background: skill.surface,
               backgroundBlendMode: "screen, screen, normal, normal",
               textShadow: "0 1px 8px rgba(4,7,20,0.6)",
+              boxShadow: `0 16px 36px ${skill.glow}, inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -12px 22px rgba(3,7,18,0.24)`,
             }}
             aria-label={`${skill.name}: ${skill.blurb}`}
             role="button"
@@ -807,7 +1057,7 @@ export default function SkillsPlayground() {
               style={wakeStyle}
             />
             <span
-              className="relative px-2 text-[0.74rem] font-semibold uppercase tracking-[0.16em] md:text-[0.88rem]"
+              className={`relative whitespace-nowrap px-0.5 font-semibold uppercase ${getLabelClass(skill.label)}`}
               style={labelStyle}
             >
               {skill.label}

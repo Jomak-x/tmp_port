@@ -1,133 +1,73 @@
 import type { Project } from "@/data/projects";
-import { ArrowLeft, ExternalLink, Github, MapPin } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import type { CSSProperties } from "react";
 import Imagecarousel from "./Imagecarousel";
+import Reveal from "./Reveal";
 
-export default function ProjectDetail({
-  project,
-  markdown,
-}: {
-  project: Project;
-  markdown: string;
-}) {
+export default function ProjectDetail({ project, markdown }: { project: Project; markdown: string }) {
   return (
-    <article className="mx-auto max-w-6xl px-4 pb-20 pt-28 text-white sm:px-6 lg:px-8">
-      <Link
-        href="/projects"
-        className="inline-flex items-center gap-2 text-sm text-orange-300 transition hover:text-orange-200"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        All projects
-      </Link>
+    <article style={{ "--project-accent": project.accent } as CSSProperties} className="page-shell text-[#f2eee6]">
+      <Reveal>
+        <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-white/48 transition hover:text-[var(--project-accent)]">
+          <ArrowLeft className="h-4 w-4" />
+          All projects
+        </Link>
+      </Reveal>
 
-      <div className={`mt-7 overflow-hidden rounded-3xl border-2 ${project.bordercolor} ${project.bgcolor} shadow-2xl shadow-black/25`}>
-        <div className="grid gap-8 p-6 sm:p-9 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <header className="min-w-0">
-            <p className={`text-sm font-semibold uppercase tracking-[0.26em] ${project.textcolor}`}>
-              {project.date}
-            </p>
-            <h1 className="mt-3 text-4xl font-bold tracking-tight sm:text-5xl">
-              {project.name}
-            </h1>
-            <div className="mt-4 flex items-center gap-2 text-sm text-white/55">
-              <MapPin className="h-4 w-4 shrink-0" />
-              <span>{project.location}</span>
-            </div>
-
-            <p className="mt-6 text-lg leading-8 text-white/78">{project.short_desc}</p>
-
-            <div className="mt-6 flex flex-wrap gap-2" aria-label="Project technologies">
-              {project.technologies.map((technology) => (
-                <span key={technology} className={`rounded-full border px-3 py-1 text-xs text-white/82 ${project.bordercolor}`}>
-                  {technology}
-                </span>
-              ))}
-            </div>
-
-            <div className="mt-7 flex flex-wrap gap-3">
-              {project.github && (
-                <a
-                  href={project.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm text-white transition hover:bg-white/14"
-                >
-                  <Github className="h-4 w-4" />
-                  GitHub
-                </a>
-              )}
-              <a
-                href={project.projectUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm text-white transition hover:bg-white/14"
-              >
-                Project page
-                <ExternalLink className="h-4 w-4" />
+      <Reveal delay={0.05} className="mt-9 grid gap-10 border-y border-white/15 py-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+        <header>
+          <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.25em] text-[var(--project-accent)]">{project.date} / {project.location}</p>
+          <h1 className="font-display mt-5 break-words text-[clamp(2.75rem,13vw,5rem)] leading-[0.92] tracking-[-0.05em] [overflow-wrap:anywhere] lg:text-8xl">{project.name}</h1>
+        </header>
+        <div>
+          <p className="text-lg leading-8 text-white/65">{project.short_desc}</p>
+          <p className="mt-6 font-mono text-[10px] uppercase leading-6 tracking-[0.12em] text-white/34">
+            {project.technologies.join(" · ")}
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            {project.github && (
+              <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-white/15 px-4 py-2.5 text-sm text-white/65 transition hover:border-[var(--project-accent)] hover:text-[var(--project-accent)]">
+                <Github className="h-4 w-4" /> GitHub
               </a>
-            </div>
-          </header>
-
-          <Imagecarousel
-            boxWidth="100%"
-            boxHeight="clamp(250px, 36vw, 420px)"
-            bordercolor={project.bordercolor}
-            className="rounded-xl"
-          >
-            {project.pictures.map((source, index) => (
-              <Image
-                key={source}
-                src={source}
-                alt={`${project.name} screenshot ${index + 1}`}
-                fill
-                sizes="(max-width: 1024px) 92vw, 540px"
-                className="object-cover"
-                priority={index === 0}
-              />
-            ))}
-          </Imagecarousel>
+            )}
+            <a href={project.projectUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-[var(--project-accent)] bg-[var(--project-accent)] px-4 py-2.5 text-sm font-semibold text-[#0c0d0d] transition hover:brightness-110">
+              Project page <ArrowUpRight className="h-4 w-4" />
+            </a>
+          </div>
         </div>
+      </Reveal>
 
-        <div className="border-t border-white/10 px-6 pb-9 pt-7 sm:px-9">
+      <Reveal delay={0.08} className="mt-12">
+        <Imagecarousel boxWidth="100%" boxHeight="clamp(300px, 55vw, 680px)" bordercolor="border-white/15">
+          {project.pictures.map((source, index) => (
+            <Image key={source} src={source} alt={`${project.name} screenshot ${index + 1}`} fill sizes="(max-width: 1280px) 100vw, 1200px" className="object-cover" priority={index === 0} />
+          ))}
+        </Imagecarousel>
+      </Reveal>
+
+      <Reveal className="mt-16 grid gap-10 border-t border-white/15 pt-10 lg:grid-cols-[0.35fr_0.65fr]">
+        <div>
+          <p className="font-mono text-[0.72rem] font-semibold uppercase tracking-[0.25em] text-[var(--project-accent)]">Case study</p>
+          {project.people && <p className="mt-5 text-sm leading-7 text-white/38">Built with {project.people}</p>}
+        </div>
+        <div className="max-w-3xl">
           <ReactMarkdown
             components={{
-              h2: ({ children }) => (
-                <h2 className={`mt-8 text-2xl font-semibold first:mt-0 ${project.textcolor}`}>
-                  {children}
-                </h2>
-              ),
-              h3: ({ children }) => (
-                <h3 className={`mt-7 text-xl font-semibold ${project.textcolor}`}>
-                  {children}
-                </h3>
-              ),
-              p: ({ children }) => (
-                <p className="mt-4 max-w-4xl text-base leading-8 text-white/78">{children}</p>
-              ),
-              ul: ({ children }) => (
-                <ul className="mt-4 grid gap-3 text-white/78 sm:grid-cols-2">{children}</ul>
-              ),
-              li: ({ children }) => (
-                <li className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 leading-7">{children}</li>
-              ),
-              a: ({ href, children }) => (
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`${project.textcolor} underline decoration-white/20 underline-offset-4 hover:text-white`}
-                >
-                  {children}
-                </a>
-              ),
+              h2: ({ children }) => <h2 className="font-display mt-12 text-4xl first:mt-0">{children}</h2>,
+              h3: ({ children }) => <h3 className="mt-9 text-xl font-semibold text-[var(--project-accent)]">{children}</h3>,
+              p: ({ children }) => <p className="mt-5 text-base leading-8 text-white/64">{children}</p>,
+              ul: ({ children }) => <ul className="mt-5 border-t border-white/12 text-white/62">{children}</ul>,
+              li: ({ children }) => <li className="border-b border-white/12 py-4 pl-6 leading-7 before:-ml-6 before:mr-3 before:text-[var(--project-accent)] before:content-['—']">{children}</li>,
+              a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-[var(--project-accent)] underline decoration-white/20 underline-offset-4 hover:text-white">{children}</a>,
             }}
           >
             {markdown}
           </ReactMarkdown>
         </div>
-      </div>
+      </Reveal>
     </article>
   );
 }

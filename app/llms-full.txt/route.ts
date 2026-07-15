@@ -1,7 +1,8 @@
 import { courses } from "@/data/courses";
 import { experienceList } from "@/data/experience";
 import { projectList } from "@/data/projects";
-import { absoluteUrl } from "@/lib/site";
+import { skillClusters, skills } from "@/data/skills";
+import { absoluteUrl, SITE_LAST_UPDATED, siteConfig } from "@/lib/site";
 import { readFile } from "fs/promises";
 import path from "path";
 
@@ -20,6 +21,7 @@ Location: ${experience.location}
 URL: ${absoluteUrl(`/experience/${experience.slug}`)}
 Summary: ${experience.summary}
 Technologies: ${experience.technologies.join(", ")}
+Organization: ${experience.organizationUrl}
 ${bullets(experience.highlights)}`,
     )
     .join("\n\n");
@@ -64,9 +66,22 @@ ${bullets(course.highlights)}`,
     )
     .join("\n\n");
 
+  const skillText = skillClusters
+    .map(
+      (cluster) =>
+        `## ${cluster.category}\n${skills
+          .filter((skill) => skill.category === cluster.category)
+          .map((skill) => skill.name)
+          .join(", ")}`,
+    )
+    .join("\n\n");
+
   const body = `# Jakob Laise - Full Portfolio Context
 
 Canonical profile: ${absoluteUrl("/")}
+Profile summary: ${siteConfig.description}
+Last updated: ${SITE_LAST_UPDATED}
+Resume page: ${absoluteUrl("/resume")}
 Resume: ${absoluteUrl("/home/Jakob_Laise_Resume.pdf")}
 Email: Jakob@Laise.de
 GitHub: https://github.com/Jomak-x
@@ -84,6 +99,10 @@ ${projectText}
 # Courses and Certificates
 
 ${courseText}
+
+# Technical Skills
+
+${skillText}
 `;
 
   return new Response(body, {

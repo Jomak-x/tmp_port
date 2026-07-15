@@ -16,6 +16,7 @@ export type CourseCredential = {
   bordercolor: string;
   bgcolor: string;
   textcolor: string;
+  accent: string;
 };
 
 export const courses: CourseCredential[] = [
@@ -48,6 +49,7 @@ export const courses: CourseCredential[] = [
     bordercolor: "border-emerald-400",
     bgcolor: "bg-emerald-400/10",
     textcolor: "text-emerald-300",
+    accent: "#34d399",
   },
   {
     slug: "codepath-tip102",
@@ -77,6 +79,7 @@ export const courses: CourseCredential[] = [
     bordercolor: "border-teal-400",
     bgcolor: "bg-teal-400/10",
     textcolor: "text-teal-300",
+    accent: "#2dd4bf",
   },
   {
     slug: "harvard-cs50x",
@@ -92,10 +95,11 @@ export const courses: CourseCredential[] = [
     highlights: [
       "Completed coursework and projects spanning programming fundamentals, algorithms, memory management, SQL-backed applications, and full-stack web development fundamentals.",
     ],
-    image: "/home/projects/CS50/CS50_1.png",
+    image: "/home/projects/CS50/CS50_1.webp",
     programUrl: "https://cs50.harvard.edu/x/",
     bordercolor: "border-red-400",
     bgcolor: "bg-red-400/10",
     textcolor: "text-red-300",
+    accent: "#f87171",
   },
 ];
