@@ -32,6 +32,7 @@ type PointerState = {
 
 type DragState = {
   pointerId: number;
+  pointerType: string;
   bubbleIndex: number;
   startX: number;
   startY: number;
@@ -317,6 +318,15 @@ export default function SkillsPlayground() {
       );
 
       if (!drag.moved && movedDistance > 8) {
+        const deltaX = Math.abs(event.clientX - drag.startX);
+        const deltaY = Math.abs(event.clientY - drag.startY);
+
+        // On touch screens, keep vertical gestures available for normal page
+        // scrolling. Horizontal gestures still control the bubble.
+        if (drag.pointerType === "touch" && deltaY > deltaX) {
+          return;
+        }
+
         drag.moved = true;
         bubble.previousState = drag.previousState;
         bubble.state = "dragging";
@@ -366,6 +376,14 @@ export default function SkillsPlayground() {
       const bubble = runtimeRef.current[drag.bubbleIndex];
 
       if (bubble) {
+        if (event.type === "pointercancel") {
+          bubble.state = drag.previousState;
+          bubble.previousState = drag.previousState;
+          bubble.pressure = 0;
+          dragRef.current = null;
+          return;
+        }
+
         if (drag.moved) {
           bubble.state = drag.previousState;
           bubble.previousState = drag.previousState;
@@ -825,7 +843,9 @@ export default function SkillsPlayground() {
       return;
     }
 
-    event.preventDefault();
+    if (event.pointerType !== "touch") {
+      event.preventDefault();
+    }
     const rect = field.getBoundingClientRect();
     const localX = event.clientX - rect.left;
     const localY = event.clientY - rect.top;
@@ -836,6 +856,7 @@ export default function SkillsPlayground() {
 
     dragRef.current = {
       pointerId: event.pointerId,
+      pointerType: event.pointerType,
       bubbleIndex: index,
       startX: event.clientX,
       startY: event.clientY,
@@ -910,7 +931,7 @@ export default function SkillsPlayground() {
         onPointerMove={handleFieldPointerMove}
         onPointerEnter={handleFieldPointerMove}
         onPointerLeave={handleFieldPointerLeave}
-        className="relative min-h-[200svh] touch-none overflow-hidden md:min-h-screen"
+        className="relative min-h-[200svh] touch-pan-y overflow-hidden md:min-h-screen"
       >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.24),transparent_26%),radial-gradient(circle_at_14%_28%,rgba(84,157,255,0.2),transparent_25%),radial-gradient(circle_at_84%_17%,rgba(255,98,185,0.18),transparent_23%),radial-gradient(circle_at_52%_94%,rgba(255,169,71,0.16),transparent_30%),linear-gradient(180deg,rgba(12,10,28,0.99),rgba(5,7,18,1))]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:58px_58px] opacity-25" />
