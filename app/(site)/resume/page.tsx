@@ -63,7 +63,7 @@ export default function ResumePage() {
       <div className="bg-[#080808] pt-20 sm:pt-24">
         <h1 className="sr-only">Jakob Laise Software Engineering Resume</h1>
         <iframe
-          src={`${resumePath}#view=FitH&toolbar=1&navpanes=0`}
+          src={`${resumePath}#view=Fit&toolbar=1&navpanes=0`}
           title="Jakob Laise software engineering resume"
           className="h-[calc(100svh-5rem)] w-full border-0 bg-white sm:h-[calc(100svh-6rem)]"
           loading="eager"
