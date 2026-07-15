@@ -54,6 +54,10 @@ export default function Footer() {
       <p className="text-xs text-white/40">
         &copy; {new Date().getFullYear()} Jakob Laise &mdash; All rights reserved
       </p>
+      <p className="mx-auto mt-2 max-w-2xl text-[11px] leading-5 text-white/30">
+        Company and program names and logos are trademarks of their respective owners
+        and are used only to identify the experience described on this portfolio.
+      </p>
     </footer>
   );
 }

@@ -1,30 +1,14 @@
 import ProjectView from "@/components/ProjectView";
-import { projects } from "@/data/projects";
-import { readFile } from "fs/promises";
-import path from "path";
+import { createPageMetadata } from "@/lib/site";
+import type { Metadata } from "next";
 
-export default async function ProjectsPage() {
-  const projectEntries = await Promise.all(
-    Object.entries(projects).map(async ([key, project]) => {
-      const filePath = path.join(
-        process.cwd(),
-        "data",
-        project.mdfile.replace("./", "")
-      );
+export const metadata: Metadata = createPageMetadata({
+  title: "Software Projects and Certificates",
+  description:
+    "Explore Jakob Laise's full-stack, AI, Databricks, multi-agent, and productivity projects plus verified AI4ALL and CodePath credentials.",
+  path: "/projects",
+});
 
-      let markdown = "Project details coming soon.";
-
-      try {
-        markdown = await readFile(filePath, "utf8");
-      } catch {
-        // keep fallback text
-      }
-
-      return [key, { ...project, markdown }] as const;
-    })
-  );
-
-  const projectsWithMarkdown = Object.fromEntries(projectEntries);
-
-  return <ProjectView projects={projectsWithMarkdown} />;
+export default function ProjectsPage() {
+  return <ProjectView />;
 }

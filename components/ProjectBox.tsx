@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
+import Link from "next/link";
 
 type ProjectBoxProps = {
   name: string;
@@ -11,7 +12,8 @@ type ProjectBoxProps = {
   startvid?: string;
   location: string;
   bgcolor?: string;
-  onClick?: () => void;
+  href: string;
+  date: string;
 };
 
 export default function ProjectBox({
@@ -24,27 +26,30 @@ export default function ProjectBox({
   startimg,
   startvid,
   location,
-  onClick,
+  href,
+  date,
 }: ProjectBoxProps) {
   const maxVisibleTech = 3;
   const visibleTech = technologies.slice(0, maxVisibleTech);
   const remainingCount = technologies.length - visibleTech.length;
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <Link
+      href={href}
       className={`${bgcolor} group flex h-full min-h-[31rem] w-full flex-col overflow-hidden rounded-2xl border-2 ${borderColor} text-left shadow-2xl shadow-black/20 transition duration-300 hover:-translate-y-1 hover:bg-white/8 focus:outline-none focus:ring-2 focus:ring-orange-300`}
     >
       <div className="relative h-52 overflow-hidden bg-black/30 sm:h-56">
         {startvid ? (
           <video
             src={startvid}
+            poster={startimg}
             autoPlay
             muted
             loop
             playsInline
             preload="metadata"
+            aria-hidden="true"
+            tabIndex={-1}
             className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
         ) : startimg ? (
@@ -62,9 +67,12 @@ export default function ProjectBox({
           <div className={`text-2xl font-semibold ${textcolor}`}>
             {name}
           </div>
-          <div className="mt-2 flex items-center gap-2 text-sm text-white/55">
-            <MapPin className="h-4 w-4 shrink-0" />
-            <span className="truncate">{location}</span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/55">
+            <span className="inline-flex items-center gap-2">
+              <MapPin className="h-4 w-4 shrink-0" />
+              <span>{location}</span>
+            </span>
+            <span>{date}</span>
           </div>
         </div>
         <p className="mt-5 line-clamp-5 flex-1 text-base leading-7 text-white/78">
@@ -86,7 +94,11 @@ export default function ProjectBox({
             </span>
           )}
         </div>
+        <span className={`mt-6 inline-flex items-center gap-2 text-sm font-semibold ${textcolor}`}>
+          View project
+          <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        </span>
       </div>
-    </button>
+    </Link>
   );
 }
